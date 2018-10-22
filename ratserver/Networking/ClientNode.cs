@@ -32,27 +32,41 @@ namespace ratserver.Networking
             OnStateChanged(this.socket.Connected);
         }
 
-        public bool Connect(string host, int port)
+        public void Connect(string host, int port)
         {
+            BeginConnect(host, port);
+        }
+
+        private void BeginConnect(string host, int port)
+        {
+            if (Connected)
+                return;
+
             if (socket == null)
             {
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             }
 
+            socket.BeginConnect(host, port, EndConnect, this);
+        }
+
+        private void EndConnect(IAsyncResult ar)
+        {
+            ClientNode client = (ClientNode)ar.AsyncState;
             try
             {
-                socket.Connect(host, port);
+                client.EndConnect(ar);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
 
-            bool connected = socket.Connected;
-            OnStateChanged(connected);
-
-            return connected;
+            if (client.socket.Connected)
+            {
+                client.OnStateChanged(true);
+            }
         }
 
         public string GetClientIdentifier()
