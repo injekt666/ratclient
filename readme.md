@@ -1,6 +1,6 @@
 # ratclient
 *Thanks to:*
-- [gigajew[(https://github.com/gigajew "gigajew")
+- [gigajew](https://github.com/gigajew "gigajew")
 
 ### Description
 Here's my super easy RAT source / base. It allows easy text communication between clients and server using sockets. I threw it together fairly quickly and I'm posting it here for educational purposes. Consider it a kick in the right direction. It's not using any fancy coding standards or anything like that. So don't expect quality work. 
