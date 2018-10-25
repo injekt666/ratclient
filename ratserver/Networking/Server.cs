@@ -92,7 +92,8 @@ namespace ratserver.Networking
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            socket.Shutdown(SocketShutdown.Both);
+            socket.Close();
         }
     }
 }

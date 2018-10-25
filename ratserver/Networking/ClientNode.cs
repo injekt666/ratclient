@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
 namespace ratserver.Networking
 {
-    public sealed class ClientNode : MarshalByRefObject, IDisposable
+    public sealed class ClientNode : IDisposable
     {
         public event EventHandler<string> MessageReceived;
         public event EventHandler<bool> StateChanged;
@@ -16,20 +17,32 @@ namespace ratserver.Networking
             private set { connected = value; }
         }
 
-        private string identifier;
         private bool connected;
-        private byte[] buffer;
         private Socket socket;
+        private byte[] buffer;
+        private string identifier;
+
+        private const int bufferSize = 4;
 
         public ClientNode() : base()
         {
-            buffer = new byte[1024];
+            buffer = new byte[bufferSize];
         }
 
-        public void InitializeFromSocket(Socket socket)
+        public void InitializeFromSocket(Socket sock)
         {
-            this.socket = socket;
-            OnStateChanged(this.socket.Connected);
+            socket = sock;
+            OnStateChanged(socket.Connected);
+        }
+
+        public string GetClientIdentifier()
+        {
+            if (identifier == null)
+            {
+                identifier = socket.RemoteEndPoint.ToString();
+            }
+
+            return identifier;
         }
 
         public void Connect(string host, int port)
@@ -56,7 +69,7 @@ namespace ratserver.Networking
             ClientNode client = (ClientNode)ar.AsyncState;
             try
             {
-                client.EndConnect(ar);
+                client.socket.EndConnect(ar);
             }
             catch (Exception ex)
             {
@@ -69,24 +82,19 @@ namespace ratserver.Networking
             }
         }
 
-        public string GetClientIdentifier()
-        {
-            if (identifier == null)
-            {
-                identifier = socket.RemoteEndPoint.ToString();
-            }
-
-            return identifier;
-        }
-
         public void Send(string message)
         {
             if (!Connected)
                 return;
 
             byte[] array = Encoding.UTF8.GetBytes(message);
-            Array.Resize(ref array, 1024);
-            socket.BeginSend(array, 0, array.Length, SocketFlags.None, EndSend, this);
+            byte[] packet = new byte[4 + array.Length];
+            Buffer.BlockCopy(array, 0, packet, 4, array.Length);
+            packet[0] = (byte)(array.Length);
+            packet[1] = (byte)(array.Length >> 8);
+            packet[2] = (byte)(array.Length >> 16);
+            packet[3] = (byte)(array.Length >> 24);
+            socket.BeginSend(packet, 0, array.Length, SocketFlags.None, EndSend, this);
         }
 
         private void EndSend(IAsyncResult ar)
@@ -99,6 +107,8 @@ namespace ratserver.Networking
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
+
+                client.OnStateChanged(false);
             }
         }
 
@@ -113,11 +123,11 @@ namespace ratserver.Networking
         private void EndReceive(IAsyncResult ar)
         {
             ClientNode client = (ClientNode)ar.AsyncState;
-            int received = 0;
+            int bytesReceived = 0;
 
             try
             {
-                received = client.socket.EndReceive(ar);
+                bytesReceived = client.socket.EndReceive(ar);
             }
             catch (Exception ex)
             {
@@ -126,17 +136,25 @@ namespace ratserver.Networking
                 client.OnStateChanged(false);
             }
 
-            if (received > 0)
+            if (bytesReceived == 4)
             {
-                client.ParseIncomingMessage();
+                int length = client.buffer[0] | client.buffer[1] << 8 | client.buffer[2] << 16 | client.buffer[3] << 24;
+                byte[] messageBuffer = new byte[length];
+
+                bytesReceived = client.socket.Receive(messageBuffer, 0, messageBuffer.Length, SocketFlags.None);
+                if (bytesReceived == messageBuffer.Length)
+                {
+                    client.ParseIncomingMessage(messageBuffer);
+                } // else error
+
             }
 
             client.BeginReceive();
         }
 
-        private void ParseIncomingMessage()
+        private void ParseIncomingMessage(byte[] payload)
         {
-            string message = Encoding.UTF8.GetString(buffer).Trim('\0');
+            string message = Encoding.UTF8.GetString(payload).Trim('\0');
             OnMessageReceived(message);
         }
 
@@ -159,8 +177,12 @@ namespace ratserver.Networking
             else
             {
                 Connected = false;
-                socket.Close();
-                socket = null;
+
+                if (socket != null)
+                {
+                    socket.Close();
+                    socket = null;
+                }
             }
 
             EventHandler<bool> handler = StateChanged;
@@ -176,6 +198,7 @@ namespace ratserver.Networking
             {
                 if (Connected)
                 {
+                    socket.Shutdown(SocketShutdown.Both);
                     socket.Disconnect(false);
                 }
 
@@ -183,6 +206,9 @@ namespace ratserver.Networking
                 socket.Dispose();
                 socket = null;
             }
+
+            buffer = null;
+            identifier = null;
         }
     }
 }

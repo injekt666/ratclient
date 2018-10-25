@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace ratclient
 {
-    class Program
+    public static class Program
     {
         private static bool identified;
         private static Client client;

@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace ratserver
 {
-    class Program
+    public static class Program
     {
         private static Server server;
         private static List<ClientNode> clients;
@@ -47,15 +47,16 @@ namespace ratserver
 
         private static void OnClientStateChanged(object sender, bool connected)
         {
+            ClientNode client = (ClientNode)sender;
             if (connected)
             {
-                clients.Add((ClientNode)sender);
-                Console.WriteLine("Client connected: " + ((ClientNode)sender).GetClientIdentifier());
+                clients.Add(client);
+                Console.WriteLine("Client connected: " + client.GetClientIdentifier());
             }
             else
             {
-                clients.Remove((ClientNode)sender);
-                Console.WriteLine("Client disconnected: " + ((ClientNode)sender).GetClientIdentifier());
+                clients.Remove(client);
+                Console.WriteLine("Client disconnected: " + client.GetClientIdentifier());
             }
         }
 
