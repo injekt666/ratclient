@@ -1,4 +1,6 @@
-﻿using ratserver.Networking;
+﻿using Interfaces;
+using ratserver.Networking;
+using Packets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,26 +25,27 @@ namespace ratserver
             Process.GetCurrentProcess().WaitForExit();
         }
 
-        private static void OnMessageReceived(object sender, string message)
+        private static void OnMessageReceived(object sender, IPacket packet)
         {
-            ProcessMessage((ClientNode)sender, message);
+            ProcessMessage((ClientNode)sender, packet);
         }
 
-        private static void ProcessMessage(ClientNode sender, string message)
+        private static void ProcessMessage(ClientNode sender, IPacket packet)
         {
             /*
              *  This is where you handle incoming client messages
              * 
              */
 
-            if (message.StartsWith("os:"))
+            if (packet.GetType() == typeof(IdentificationPacket))
             {
-                // todo: parse operating system, and hardware id 
-                //       and whatever
-                sender.Send("Thank you for identifying with us, " + sender.GetClientIdentifier());
+                IdentificationPacket identity = (IdentificationPacket)packet;
+                Console.WriteLine(sender.GetClientIdentifier() + " identified themselves as " + identity.Name + ". They are currently running " + identity.OperatingSystem );
+            } else if (packet.GetType() == typeof(StringMessagePacket ))
+            {
+                StringMessagePacket message = (StringMessagePacket)packet;
+                Console.WriteLine(sender.GetClientIdentifier() + " said: " + message.Message);
             }
-
-            Console.WriteLine(sender.GetClientIdentifier() + " said: " + message);
         }
 
         private static void OnClientStateChanged(object sender, bool connected)

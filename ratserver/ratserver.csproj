@@ -42,10 +42,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IPacket.cs" />
     <Compile Include="Networking\ClientNode.cs" />
+    <Compile Include="Packets\DoShutdownPacket.cs" />
+    <Compile Include="Packets\IdentificationPacket.cs" />
+    <Compile Include="Packets\StringMessagePacket.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Networking\Server.cs" />
+    <Compile Include="Serialization\PacketSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

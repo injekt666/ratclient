@@ -1,3 +1,11 @@
 .vs
 .vs\
 .vs\*
+bin\*
+*\bin\*
+obj\*
+*\obj\*
+ratclient\bin
+ratclient\obj
+ratserver\bin
+ratserver\obj

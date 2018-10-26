@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Interfaces;
+using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -9,7 +10,7 @@ namespace ratserver.Networking
     {
         public event EventHandler<bool> ServerStateChanged;
         public event EventHandler<bool> ClientStateChanged;
-        public event EventHandler<string> ClientMessageReceived;
+        public event EventHandler<IPacket> ClientMessageReceived;
 
         private Socket socket;
 
@@ -49,12 +50,12 @@ namespace ratserver.Networking
             server.BeginAccept();
         }
 
-        private void OnClientMessageReceived(object sender, string message)
+        private void OnClientMessageReceived(object sender, IPacket packet)
         {
-            EventHandler<string> handler = ClientMessageReceived;
+            EventHandler<IPacket> handler = ClientMessageReceived;
             if (handler != null)
             {
-                handler(sender, message);
+                handler(sender, packet);
             }
         }
 

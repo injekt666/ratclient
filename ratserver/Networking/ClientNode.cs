@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Interfaces;
+using ratserver.Serialization;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -8,7 +10,7 @@ namespace ratserver.Networking
 {
     public sealed class ClientNode : IDisposable
     {
-        public event EventHandler<string> MessageReceived;
+        public event EventHandler<IPacket> MessageReceived;
         public event EventHandler<bool> StateChanged;
 
         public bool Connected
@@ -21,12 +23,14 @@ namespace ratserver.Networking
         private Socket socket;
         private byte[] buffer;
         private string identifier;
+        private PacketSerializer serializer;
 
         private const int bufferSize = 4;
 
         public ClientNode() : base()
         {
             buffer = new byte[bufferSize];
+            serializer = new PacketSerializer();
         }
 
         public void InitializeFromSocket(Socket sock)
@@ -82,19 +86,29 @@ namespace ratserver.Networking
             }
         }
 
-        public void Send(string message)
+        public void Send(IPacket packet)
         {
             if (!Connected)
                 return;
 
-            byte[] array = Encoding.UTF8.GetBytes(message);
-            byte[] packet = new byte[4 + array.Length];
-            Buffer.BlockCopy(array, 0, packet, 4, array.Length);
-            packet[0] = (byte)(array.Length);
-            packet[1] = (byte)(array.Length >> 8);
-            packet[2] = (byte)(array.Length >> 16);
-            packet[3] = (byte)(array.Length >> 24);
-            socket.BeginSend(packet, 0, array.Length, SocketFlags.None, EndSend, this);
+            byte[] serializedPacket = null;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                serializer.Serialize(stream, packet);
+                serializedPacket = stream.ToArray();
+
+                stream.SetLength(0L);
+
+                stream.WriteByte((byte)serializedPacket.Length);
+                stream.WriteByte((byte)(serializedPacket.Length >> 8));
+                stream.WriteByte((byte)(serializedPacket.Length >> 16));
+                stream.WriteByte((byte)(serializedPacket.Length >> 24));
+                stream.Write(serializedPacket, 0, serializedPacket.Length);
+
+                serializedPacket = stream.ToArray();
+            }
+
+            socket.BeginSend(serializedPacket, 0, serializedPacket.Length, SocketFlags.None, EndSend, this);
         }
 
         private void EndSend(IAsyncResult ar)
@@ -154,16 +168,21 @@ namespace ratserver.Networking
 
         private void ParseIncomingMessage(byte[] payload)
         {
-            string message = Encoding.UTF8.GetString(payload).Trim('\0');
-            OnMessageReceived(message);
+            //string message = Encoding.UTF8.GetString(payload).Trim('\0');
+            IPacket packet = null;
+            using (MemoryStream stream = new MemoryStream(payload))
+            {
+                packet = serializer.Deserialize(stream);
+            }
+            OnMessageReceived(packet);
         }
 
-        private void OnMessageReceived(string message)
+        private void OnMessageReceived(IPacket packet)
         {
-            EventHandler<string> handler = MessageReceived;
+            EventHandler<IPacket> handler = MessageReceived;
             if (handler != null)
             {
-                handler(this, message);
+                handler(this, packet);
             }
         }
 
