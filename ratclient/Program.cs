@@ -3,12 +3,12 @@ using ratclient.Networking;
 using Packets;
 using System;
 using System.Diagnostics;
+using ratclient.Handlers;
 
 namespace ratclient
 {
     public static class Program
     {
-        private static bool identified;
         private static Client client;
 
         public static void Main(string[] args)
@@ -26,27 +26,6 @@ namespace ratclient
             Process.GetCurrentProcess().WaitForExit();
         }
 
-        private static bool ProcessCommand(IPacket packet)
-        {
-            /*
-             *  This is where you handle incoming commands
-             * 
-             */
-
-            if (packet.GetType() == typeof(DoShutdownPacket))
-            {
-                Environment.Exit(0);
-                return true;
-            } else if (packet.GetType() == typeof(StringMessagePacket ))
-            {
-                StringMessagePacket message = (StringMessagePacket)packet;
-                Console.WriteLine("Server said : " + message.Message );
-                return true;
-            }
-
-            return false;
-        }
-
         private static void OnMessageReceived(object sender, IPacket message)
         {
             /*
@@ -55,10 +34,7 @@ namespace ratclient
              * 
              */
 
-            if (!ProcessCommand(message))
-            {
-                Console.WriteLine("Received unprocessed message: " + message);
-            }
+            PacketHandler.HandlePacket((Client)sender, message);
         }
 
         private static void OnStateChanged(object sender, bool connected)
@@ -67,27 +43,12 @@ namespace ratclient
             if (connected)
             {
                 Console.WriteLine("Connected");
-
-                if (!identified)
-                    Identify(node);
-
-                node.Send(StringMessagePacket.Create("Hello Mr. Server!!!!!!!"));
             }
             else
             {
                 Console.WriteLine("Disconnected");
             }
         }
-
-        private static void Identify(Client client)
-        {
-            client.Send(new IdentificationPacket()
-            {
-                Name = "Charlie",
-                OperatingSystem = "Windows 10 Professional"
-            });
-
-            identified = true;
-        }
+        
     }
 }

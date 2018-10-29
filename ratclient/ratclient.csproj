@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\CommandHandler.cs" />
+    <Compile Include="Handlers\PacketHandler.cs" />
     <Compile Include="Interfaces\IPacket.cs" />
     <Compile Include="Networking\Client.cs" />
     <Compile Include="Packets\DoShutdownPacket.cs" />

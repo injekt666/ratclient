@@ -12,5 +12,14 @@ namespace Packets
     {
         public string Name;
         public string OperatingSystem;
+
+        public static IdentificationPacket Create(string name, string os)
+        {
+            return new IdentificationPacket()
+            {
+                Name=  name,
+                OperatingSystem = os
+            };
+        }
     }
 }

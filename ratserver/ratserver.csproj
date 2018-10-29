@@ -42,6 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\CommandHandler.cs" />
+    <Compile Include="Handlers\PacketHandler.cs" />
     <Compile Include="Interfaces\IPacket.cs" />
     <Compile Include="Networking\ClientNode.cs" />
     <Compile Include="Packets\DoShutdownPacket.cs" />

@@ -1,9 +1,10 @@
 ﻿using Interfaces;
 using ratserver.Networking;
-using Packets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ratserver.Handlers;
+using Packets;
 
 namespace ratserver
 {
@@ -27,25 +28,13 @@ namespace ratserver
 
         private static void OnMessageReceived(object sender, IPacket packet)
         {
-            ProcessMessage((ClientNode)sender, packet);
-        }
-
-        private static void ProcessMessage(ClientNode sender, IPacket packet)
-        {
             /*
-             *  This is where you handle incoming client messages
-             * 
-             */
+           * 
+           *  This is where you can change how we handle incoming messages from the clients
+           * 
+           */
 
-            if (packet.GetType() == typeof(IdentificationPacket))
-            {
-                IdentificationPacket identity = (IdentificationPacket)packet;
-                Console.WriteLine(sender.GetClientIdentifier() + " identified themselves as " + identity.Name + ". They are currently running " + identity.OperatingSystem );
-            } else if (packet.GetType() == typeof(StringMessagePacket ))
-            {
-                StringMessagePacket message = (StringMessagePacket)packet;
-                Console.WriteLine(sender.GetClientIdentifier() + " said: " + message.Message);
-            }
+            PacketHandler.HandlePacket((ClientNode)sender, packet);
         }
 
         private static void OnClientStateChanged(object sender, bool connected)
@@ -55,6 +44,8 @@ namespace ratserver
             {
                 clients.Add(client);
                 Console.WriteLine("Client connected: " + client.GetClientIdentifier());
+
+                client.Send(IdentificationPacket.CreateRequest());
             }
             else
             {
