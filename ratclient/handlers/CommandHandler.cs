@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualBasic.Devices;
-using Packets;
 using ratclient.Networking;
+using ratclient.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,10 +1,11 @@
-﻿using Interfaces;
+﻿
 using ratserver.Networking;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using ratserver.Handlers;
-using Packets;
+using ratserver.Packets;
+using ratserver.Interfaces;
 
 namespace ratserver
 {

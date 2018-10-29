@@ -1,11 +1,12 @@
-﻿using Interfaces;
+﻿
+using ratserver.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Packets
+namespace ratserver.Packets
 {
     [Serializable ]
     public class IdentificationPacket : IPacket

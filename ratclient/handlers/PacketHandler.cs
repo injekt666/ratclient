@@ -1,6 +1,7 @@
-﻿using Interfaces;
-using Packets;
+﻿
+using ratclient.Interfaces;
 using ratclient.Networking;
+using ratclient.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;

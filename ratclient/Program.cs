@@ -1,9 +1,10 @@
-﻿using Interfaces;
-using ratclient.Networking;
-using Packets;
-using System;
+﻿using System;
 using System.Diagnostics;
+using ratclient.Networking;
+using ratclient.Packets;
 using ratclient.Handlers;
+using ratclient.Interfaces;
+
 
 namespace ratclient
 {

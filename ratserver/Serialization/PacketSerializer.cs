@@ -1,13 +1,9 @@
-﻿using Interfaces;
+﻿using ratserver.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ratserver.Serialization
 {
@@ -32,20 +28,30 @@ namespace ratserver.Serialization
         }
     }
 
-    public class BindChanger : System.Runtime.Serialization.SerializationBinder
+    public class BindChanger : SerializationBinder
     {
         public override Type BindToType(string assemblyName, string typeName)
         {
-            // Define the new type to bind to
-            Type typeToDeserialize = null;
+            string modifiedTypeName = GetModifiedTypeName(typeName);
+            return Type.GetType(string.Format("{0}, {1}", modifiedTypeName, Assembly.GetEntryAssembly().FullName));
+        }
 
-            // Get the current assembly
-            string currentAssembly = Assembly.GetExecutingAssembly().FullName;
+        private string GetModifiedTypeName(string originalTypeName)
+        {
+            string oldRootNamespace = GetRootNamespace(originalTypeName);
+            string currentRootNamespace = GetRootNamespace();
+            return originalTypeName.Replace(oldRootNamespace, currentRootNamespace);
+        }
 
-            // Create the new type and return it
-            typeToDeserialize = Type.GetType(string.Format("{0}, {1}", typeName, currentAssembly));
+        private string GetRootNamespace()
+        {
+            string assemblyName = Assembly.GetEntryAssembly().FullName;
+            return assemblyName.Substring(0, assemblyName.IndexOf(','));
+        }
 
-            return typeToDeserialize;
+        private string GetRootNamespace(string originalTypeName)
+        {
+            return originalTypeName.Substring(0, originalTypeName.IndexOf('.'));
         }
     }
 }

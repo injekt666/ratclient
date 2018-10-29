@@ -1,4 +1,5 @@
-﻿using Interfaces;
+﻿
+using ratclient.Interfaces;
 using ratclient.Serialization;
 using System;
 using System.Diagnostics;
