@@ -1,10 +1,6 @@
 .vs
-.vs\
-.vs\*
-bin\*
-*\bin\*
-obj\*
-*\obj\*
+.vs/
+.vs/*
 ratclient/bin/
 ratclient/obj/
 ratserver/bin/

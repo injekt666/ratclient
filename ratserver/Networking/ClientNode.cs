@@ -71,6 +71,8 @@ namespace ratserver.Networking
 
         private void EndConnect(IAsyncResult ar)
         {
+            ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(5), false);
+
             ClientNode client = (ClientNode)ar.AsyncState;
             try
             {
@@ -114,6 +116,8 @@ namespace ratserver.Networking
 
         private void EndSend(IAsyncResult ar)
         {
+            ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(5), false);
+
             ClientNode client = (ClientNode)ar.AsyncState;
             try
             {
@@ -137,6 +141,8 @@ namespace ratserver.Networking
 
         private void EndReceive(IAsyncResult ar)
         {
+            ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(5), false);
+
             ClientNode client = (ClientNode)ar.AsyncState;
             int bytesReceived = 0;
 

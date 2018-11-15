@@ -40,6 +40,8 @@ namespace ratserver.Networking
 
         private void EndAccept(IAsyncResult ar )
         {
+            ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(5), false);
+
             Server server = (Server)ar.AsyncState;
             Socket client = server.socket.EndAccept(ar);
 
