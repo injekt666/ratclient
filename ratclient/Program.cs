@@ -4,13 +4,16 @@ using ratclient.Networking;
 using ratclient.Packets;
 using ratclient.Handlers;
 using ratclient.Interfaces;
-
+using System.Threading;
 
 namespace ratclient
 {
     public static class Program
     {
         private static Client client;
+        public const string version = "v1.0.0.0";
+        public const string host = "localhost";
+        public const int port = 8894;
 
         public static void Main(string[] args)
         {
@@ -22,7 +25,7 @@ namespace ratclient
             client.StateChanged += OnStateChanged;
 
             // connect
-            client.Connect("localhost", 44025);
+            client.Connect(host, port);
 
             Process.GetCurrentProcess().WaitForExit();
         }
@@ -40,6 +43,7 @@ namespace ratclient
 
         private static void OnStateChanged(object sender, bool connected)
         {
+           
             Client node = (Client)sender;
             if (connected)
             {
@@ -48,6 +52,8 @@ namespace ratclient
             else
             {
                 Console.WriteLine("Disconnected");
+                Thread.Sleep(TimeSpan.FromSeconds(10));
+                node.Connect(host, port);
             }
         }
         

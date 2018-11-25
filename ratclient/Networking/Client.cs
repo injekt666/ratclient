@@ -82,11 +82,8 @@ namespace ratclient.Networking
             {
                 Debug.WriteLine(ex.Message);
             }
-
-            if (client.socket.Connected)
-            {
-                client.OnStateChanged(true);
-            }
+            
+            client.OnStateChanged(client.socket.Connected);
         }
 
         public void Send(IPacket packet)

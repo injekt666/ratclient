@@ -17,3 +17,6 @@ Source: https://github.com/gigajew/ratclient
 ### How to download
 1. Locate the green button at the top-right corner of this page (above the list of files) and click 'Download ZIP'
 2. Download and install git bash, open up your terminal, and write "git clone https://github.com/gigajew/ratclient ratclient"
+
+### Images
+![ratserver](https://i.imgur.com/jnWyhRA.png "ratserver")

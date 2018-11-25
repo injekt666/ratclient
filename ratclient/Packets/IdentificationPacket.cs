@@ -8,19 +8,13 @@ using System.Threading.Tasks;
 
 namespace ratclient.Packets
 {
-    [Serializable ]
+    [Serializable]
     public class IdentificationPacket : IPacket
     {
         public string Name;
         public string OperatingSystem;
-
-        public static IdentificationPacket Create(string name, string os)
-        {
-            return new IdentificationPacket()
-            {
-                Name=  name,
-                OperatingSystem = os
-            };
-        }
+        public string MachineName;
+        public string RAM;
+        public string Version;
     }
 }
